@@ -1,30 +1,38 @@
 portage_snapshot Cookbook
 =========================
-Install a remote portage snapshot.
+Install a portage snapshot from a remote HTTP server.
 
 Gentoo, more than other distros, makes it easy to have a "frozen
 repository" of packages.  This is important in the data center, when
-it's important that your server deployments are deterministic - in
-other words, the same system can be built a month from now that you
-built today.  We're adjusting this "rolling release" distro into
-one that rolls at an appropriate tempo for your business.
+you want some guarantee that your server deployments are deterministic
+- in other words, the same system can be built a month from now that
+you built today.  We're adjusting Gentoo's "rolling release"
+capability so that it rolls at an appropriate tempo for your business.
+You want to give up "emerge --sync" on these systems.
 
-This cookbook downloads a portage snapshot tarball with checksum,
-confirms the checksum, extracts the archive (maybe deleting your old
-portage tree first), and sets the PORTDIR value in make.conf.
+This cookbook:
+1. downloads a portage snapshot tarball with checksum
+1. confirms the checksum
+1. extracts the archive to a directory that can hold multiple snapshots
+1. maybe backs up your original system PORTDIR
+1. symlinks your PORTDIR to the latest snapshot
+1. sets the PORTDIR value in make.conf
+
+The symlink setup maximizes the resilience of the cookbook and also
+makes it easy to roll back to an old snapshot if the new one makes
+problems.
 
 It is up to you to pre-place an archive/checksum where they can be
 downloaded over HTTP (e.g. CloudFiles or standard web hosting).  You
-could link directly to a Gentoo mirror (the configured default), but
-snapshots only remain at a mirror for a week, which probably isn't
-adequate for your needs.
+mustn't link directly to a Gentoo mirror because snapshots are only
+mirrored for a week.
 
-Note that the recipe deletes the PORTDIR entirely before extracting a
-new one.  This has the effect of deleting DISTDIR and PKGDIR, which by
-default are under PORTDIR, and this may in fact be a nice way to keep
-the disk from filling with distfiles.  However, if you use PKGDIR, or
-if don't want your distfiles cache to be purged, consider moving your
-DISTDIR and/or PKGDIR to a location outside of PORTDIR.
+Note that if your DISTDIR and PKGDIR are under PORTDIR, then the
+symlink change will orphan those old files.  This can be a natural way
+to keep old stuff from accumulating.  If you're not okay with this,
+just change your DISTDIR and PKGDIR to be outside of PORTDIR.  A
+future enhancement will allow deleting all snapshots except the newest
+N snapshots, so the disk won't fill over time.
 
 Requirements
 ------------
@@ -71,6 +79,12 @@ Just include `portage_snapshot` in your node's `run_list`:
   ]
 }
 ```
+
+Todo
+----
+- Recipe deletes all snapshots except the n newest
+- Check gpg signature (can be disabled)
+- Allow disabling checksum
 
 Contributing
 ------------
