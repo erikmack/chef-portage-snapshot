@@ -16,7 +16,7 @@ directory portdir do
   action :create
 end
 
-archive = settings[:archive_filename]
+archive = "#{settings[:archive_basename]}#{settings[:archive_suffix]}"
 remote_file "/tmp/#{archive}" do
   source "#{settings[:base_url]}/#{archive}"
   action :create_if_missing
