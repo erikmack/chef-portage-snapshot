@@ -8,7 +8,8 @@ you want some guarantee that your server deployments are deterministic
 - in other words, the same system can be built a month from now that
 you built today.  We're adjusting Gentoo's "rolling release"
 capability so that it rolls at an appropriate tempo for your business.
-You want to give up "emerge --sync" on these systems.
+
+In short, this replaces "emerge --sync" on these systems.
 
 This cookbook:
 1. downloads a portage snapshot tarball with checksum
@@ -30,9 +31,14 @@ mirrored for a week.
 Note that if your DISTDIR and PKGDIR are under PORTDIR, then the
 symlink change will orphan those old files.  This can be a natural way
 to keep old stuff from accumulating.  If you're not okay with this,
-just change your DISTDIR and PKGDIR to be outside of PORTDIR.  A
-future enhancement will allow deleting all snapshots except the newest
-N snapshots, so the disk won't fill over time.
+just change your DISTDIR and PKGDIR to be outside of PORTDIR. 
+
+A cleaning feature, enabled by default, deletes all but the newest
+three snapshots.  This keeps the recipe from filling your disk over
+time with snapshots.  At this time, "newest" is determined by sorting
+the directories under the snapshots directory and taking the latest
+ones, which requires that your basename is in a date-sortable format
+(e.g.  portage-20131009) like Gentoo publishes them.
 
 Requirements
 ------------
@@ -82,9 +88,11 @@ Just include `portage_snapshot` in your node's `run_list`:
 
 Todo
 ----
-- Recipe deletes all snapshots except the n newest
+- Cleaning check could determine "newest" snapshots from first 
+  field in metadata/timestamp.x instead of sorting dir names.
+  Use a ruby block for this not bash
 - Check gpg signature (can be disabled)
-- Allow disabling checksum
+- Allow disabling checksum download/check
 
 Contributing
 ------------

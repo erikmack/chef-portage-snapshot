@@ -8,51 +8,45 @@
 #
 
 settings = node[:portage_snapshot]
+
 portdir = settings[:portdir]
-directory portdir do
-  owner "root"
-  group "root"
-  mode 0755
-  action :create
-end
-
-archive = "#{settings[:archive_basename]}#{settings[:archive_suffix]}"
-remote_file "/tmp/#{archive}" do
-  source "#{settings[:base_url]}/#{archive}"
-  action :create_if_missing
-end
-
-checksum = "#{archive}.md5sum"
-remote_file "/tmp/#{checksum}" do
-  source "#{settings[:base_url]}/#{checksum}"
-  action :create_if_missing
-end
-
 base = settings[:archive_basename]
 snaps = settings[:snapshots_dir]
 thissnap = "#{snaps}/#{base}"
 
+directory thissnap do
+  action :create
+  recursive true
+  owner "root"
+  group "root"
+end
+
+archive = "#{base}#{settings[:archive_suffix]}"
+baseurl = settings[:base_url]
+remote_file "#{thissnap}/#{archive}" do
+  source "#{baseurl}/#{archive}"
+  action :create_if_missing
+end
+
+checksum = "#{archive}.md5sum"
+remote_file "#{thissnap}/#{checksum}" do
+  source "#{baseurl}/#{checksum}"
+  action :create_if_missing
+end
+
 bash "extract_archive" do
-  cwd snaps
+  cwd thissnap
   code <<-EOH
-  pushd /tmp
   if ! md5sum --check #{checksum}; then
-    echo "checksum failed for portage snapshot, failing"
+    echo "checksum failed for portage snapshot, deleting corrupted artifacts and failing"
+    rm -rf *
     exit 1
   fi
-  popd
-  tar xf /tmp/#{archive}
+  tar xf #{archive}
   EOH
   
   # A somewhat arbitrary guard against repeated extraction
-  not_if "test -f #{thissnap}/metadata/timestamp"
-end
-
-ruby_block "Rename snapshot dir" do
-  block do
-    ::File.rename("#{snaps}/portage",thissnap)
-  end
-  only_if "test -d #{snaps}/portage"
+  not_if "test -f #{thissnap}/portage/metadata/timestamp"
 end
 
 # If the original system portdir is the
@@ -74,9 +68,17 @@ link portdir do
 end
 
 link portdir do
-  to thissnap
+  to "#{thissnap}/portage"
 end
 
 portage_make_conf_entry "PORTDIR" do
   value portdir
+end
+
+bash 'clean_old_snapshots' do
+  cwd snaps
+  code <<-EOH
+  rm -rf $(ls | head -n -#{settings[:keep_n_newest_snapshots]})
+  EOH
+  only_if {settings[:clean_old_snapshots]}
 end
