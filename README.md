@@ -42,17 +42,11 @@ ones, which requires that your basename is in a date-sortable format
 
 Requirements
 ------------
-TODO: List your cookbook requirements. Be sure to include any requirements this cookbook has on platforms, libraries, other cookbooks, packages, operating systems, etc.
-
-e.g.
-#### packages
-- `toaster` - portage_snapshot needs toaster to brown your bagel.
+portage_snapshot requires the portage cookbook by Vasily Mikhaylichenko
+https://github.com/lxmx/chef-portage.
 
 Attributes
 ----------
-TODO: List you cookbook attributes here.
-
-e.g.
 #### portage_snapshot::default
 <table>
   <tr>
@@ -67,19 +61,65 @@ e.g.
     <td>whether to include bacon</td>
     <td><tt>true</tt></td>
   </tr>
+  <tr>
+    <td><tt>['portage_snapshot'][:archive_basename]</tt></td>
+    <td>String</td>
+    <td>The date-sortable snapshot name.</td>
+    <td><tt>'portage-20131009'</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['portage_snapshot'][:archive_suffix]</tt></td>
+    <td>String</td>
+    <td>archive_basename + archive_suffix = short file name</td>
+    <td><tt>'.tar.xz'</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['portage_snapshot'][:base_url]</tt></td>
+    <td>String</td>
+    <td>Where to download the snapshot, excluding the /filename</td>
+    <td><tt>'http://myfiles.example.org'</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['portage_snapshot'][:portdir]</tt></td>
+    <td>String</td>
+    <td>The filesystem location where the portage tree should live</td>
+    <td><tt>'/usr/portage'</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['portage_snapshot'][:snapshots_dir]</tt></td>
+    <td>String</td>
+    <td>A place to keep snapshots</td>
+    <td><tt>'/var/portage_snapshots'</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['portage_snapshot'][:clean_old_snapshots]</tt></td>
+    <td>Boolean</td>
+    <td>Whether to delete old snapshots to set an upper bound on disk usage</td>
+    <td><tt>true</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['portage_snapshot'][:keep_n_newest_snapshots]</tt></td>
+    <td>Integer</td>
+    <td>How many snapshots to keep if :clean_old_snapshots is true</td>
+    <td><tt>3</tt></td>
+  </tr>
 </table>
 
 Usage
 -----
 #### portage_snapshot::default
-TODO: Write usage instructions for each cookbook.
-
-e.g.
-Just include `portage_snapshot` in your node's `run_list`:
+Include `portage_snapshot` in your node's `run_list`, and
+specify the URL and snapshot basename for the download.
 
 ```json
 {
   "name":"my_node",
+  "normal" : {
+    "portage_snapshot" : {
+      "base_url" : "http://mycdn.example.org/foobucket",
+      "archive_basename" : "portage-20131009"
+    }
+  },
   "run_list": [
     "recipe[portage_snapshot]"
   ]
@@ -96,16 +136,9 @@ Todo
 
 Contributing
 ------------
-TODO: (optional) If this is a public cookbook, detail the process for contributing. If this is a private cookbook, remove this section.
-
-e.g.
-1. Fork the repository on Github
-2. Create a named feature branch (like `add_component_x`)
-3. Write you change
-4. Write tests for your change (if applicable)
-5. Run the tests, ensuring they all pass
-6. Submit a Pull Request using Github
+Pull requests, patches, issues, e-mails welcome.
 
 License and Authors
 -------------------
-Authors: TODO: List authors
+GPLv3
+Erik Mackdanz
