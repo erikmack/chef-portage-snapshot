@@ -140,5 +140,5 @@ Pull requests, patches, issues, e-mails welcome.
 
 License and Authors
 -------------------
-GPLv3
+Affero GPL v3
 Erik Mackdanz
