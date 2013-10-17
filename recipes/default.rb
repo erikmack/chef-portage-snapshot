@@ -78,7 +78,7 @@ end
 bash 'clean_old_snapshots' do
   cwd snaps
   code <<-EOH
-  rm -rf $(ls | head -n -#{settings[:keep_n_newest_snapshots]})
+  rm -rf $(ls | head -n -#{settings[:keep_n_newest_snapshots]} | grep -v #{base})
   EOH
   only_if {settings[:clean_old_snapshots]}
 end
