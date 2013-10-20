@@ -123,6 +123,26 @@ specify the URL and snapshot basename for the download.
 }
 ```
 
+#### portage_snapshot::update
+Include `portage_snapshot::update` in your node's `run_list`,
+optionally, to run a system update following the snapshot install
+
+```json
+{
+  "name":"my_node",
+  "normal" : {
+    "portage_snapshot" : {
+      "base_url" : "http://mycdn.example.org/foobucket",
+      "archive_basename" : "portage-20131009"
+    }
+  },
+  "run_list": [
+    "recipe[portage_snapshot]",
+    "recipe[portage_snapshot::update]"
+  ]
+}
+```
+
 Todo
 ----
 - Cleaning check could determine "newest" snapshots from first 
